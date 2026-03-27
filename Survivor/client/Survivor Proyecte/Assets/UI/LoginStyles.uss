@@ -1,0 +1,83 @@
+/* Contenidor Principal */
+.main-container {
+    flex-grow: 1;
+    background-color: rgb(15, 15, 25);
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+}
+
+/* Panell de Login */
+.login-panel {
+    background-color: rgba(25, 25, 40, 0.9);
+    border-width: 2px;
+    border-color: rgb(0, 255, 255); /* Cian Neó */
+    border-radius: 15px;
+    padding: 30px;
+    width: 350px;
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+}
+
+/* Títol */
+.header {
+    font-size: 32px;
+    color: rgb(255, 0, 255); /* Magenta Neó */
+    -unity-font-style: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    -unity-text-outline-width: 1px;
+    -unity-text-outline-color: rgb(100, 0, 100);
+}
+
+/* Inputs de Text */
+.input-field {
+    margin-bottom: 15px;
+    color: white;
+}
+
+.input-field .unity-base-field__label {
+    color: rgb(0, 255, 255);
+    margin-bottom: 5px;
+}
+
+.input-field .unity-text-field__input {
+    background-color: rgb(10, 10, 20);
+    border-color: rgb(0, 150, 150);
+    border-radius: 5px;
+    padding: 8px;
+}
+
+/* Botons */
+.btn-neon {
+    background-color: transparent;
+    border-width: 2px;
+    border-color: rgb(0, 255, 255);
+    color: rgb(0, 255, 255);
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 10px;
+    transition-duration: 0.2s;
+}
+
+.btn-neon:hover {
+    background-color: rgb(0, 255, 255);
+    color: black;
+    scale: 1.05;
+}
+
+.btn-register {
+    border-color: rgb(255, 0, 255);
+    color: rgb(255, 0, 255);
+}
+
+.btn-register:hover {
+    background-color: rgb(255, 0, 255);
+    color: white;
+}
+
+.status-label {
+    margin-top: 15px;
+    color: rgb(200, 200, 200);
+    text-align: center;
+    font-size: 12px;
+}
