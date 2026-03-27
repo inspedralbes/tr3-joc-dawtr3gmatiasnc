@@ -1,0 +1,16 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project:/Assets/UI/LoginStyles.uss" />
+    <ui:VisualElement class="main-container">
+        <ui:VisualElement class="login-panel">
+            <ui:Label text="NEON SURVIVOR" class="header" />
+            
+            <ui:TextField label="USER" name="username-input" class="input-field" />
+            <ui:TextField label="PASS" name="password-input" password="true" class="input-field" />
+            
+            <ui:Button text="LOGIN" name="login-button" class="btn-neon" />
+            <ui:Button text="REGISTER" name="register-button" class="btn-neon btn-register" />
+            
+            <ui:Label name="status-text" class="status-label" text="Estat: Esperant dades..." />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
