@@ -1,0 +1,29 @@
+{
+    "Perseguidor": {
+        "checkpoints": [
+            {
+                "steps": 122633,
+                "file_path": "results/prova10/Perseguidor/Perseguidor-122633.onnx",
+                "reward": 0.9525223917035914,
+                "creation_time": 1776236254.158175,
+                "auxillary_file_paths": [
+                    "results/prova10/Perseguidor/Perseguidor-122633.pt"
+                ]
+            }
+        ],
+        "final_checkpoint": {
+            "steps": 122633,
+            "file_path": "results/prova10/Perseguidor.onnx",
+            "reward": 0.9525223917035914,
+            "creation_time": 1776236254.158175,
+            "auxillary_file_paths": [
+                "results/prova10/Perseguidor/Perseguidor-122633.pt"
+            ]
+        }
+    },
+    "metadata": {
+        "stats_format_version": "0.3.0",
+        "mlagents_version": "1.1.0",
+        "torch_version": "2.2.2+cu121"
+    }
+}
