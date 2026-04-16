@@ -1,16 +1,42 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    
     <Style src="project:/Assets/UI/LoginStyles.uss" />
+    <Style src="project:/Assets/UI/LoginStyles.uss" />
+    
     <ui:VisualElement class="main-container">
-        <ui:VisualElement class="login-panel">
-            <ui:Label text="NEON SURVIVOR" class="header" />
+        
+        <ui:VisualElement name="login-panel" class="login-panel">
             
-            <ui:TextField label="USER" name="username-input" class="input-field" />
-            <ui:TextField label="PASS" name="password-input" password="true" class="input-field" />
+            <ui:Label text="KINGDOM SURVIVOR" class="header" />
+            <ui:VisualElement class="separator" />
             
-            <ui:Button text="LOGIN" name="login-button" class="btn-neon" />
-            <ui:Button text="REGISTER" name="register-button" class="btn-neon btn-register" />
+            <ui:VisualElement class="inputs-container">
+                <ui:TextField label="USUARIO" name="username-input" class="input-field" />
+                <ui:TextField label="CONTRASEÑA" name="password-input" password="true" class="input-field" />
+            </ui:VisualElement>
             
-            <ui:Label name="status-text" class="status-label" text="Estat: Esperant dades..." />
+            <ui:VisualElement class="buttons-container">
+                <ui:Button text="ENTRAR" name="login-button" class="btn-medieval btn-login" />
+                <ui:Button text="ALISTARSE" name="register-button" class="btn-medieval btn-register" />
+            </ui:VisualElement>
+            
+            <ui:Label name="status-text" class="status-label" text="Estado: Esperando al cuervo..." />
+            
         </ui:VisualElement>
+
+        <ui:VisualElement name="menu-panel" class="menu-panel" style="display: none;">
+            
+            <ui:Label text="MENÚ PRINCIPAL" class="menu-header" />
+            <ui:VisualElement class="separator-gold" />
+            
+            <ui:VisualElement class="options-container">
+                <ui:Button text="MODO SOLITARIO" name="singleplayer-button" class="btn-medieval btn-large" />
+                <ui:Button text="MULTIJUGADOR" name="multiplayer-button" class="btn-medieval btn-large" />
+            </ui:VisualElement>
+
+            <ui:Button text="CERRAR SESIÓN" name="logout-button" class="btn-logout" />
+            
+        </ui:VisualElement>
+
     </ui:VisualElement>
 </ui:UXML>
