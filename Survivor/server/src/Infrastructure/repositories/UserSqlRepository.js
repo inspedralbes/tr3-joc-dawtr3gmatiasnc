@@ -1,5 +1,5 @@
 const IUserRepository = require('../../Domain/IUserRepository');
-const pool = require('../database/db'); // Tu archivo de conexión a MySQL
+const pool = require('../database/db'); 
 
 class UserSqlRepository extends IUserRepository {
     async findById(id) {

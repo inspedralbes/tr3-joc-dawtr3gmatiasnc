@@ -7,7 +7,6 @@ let db;
 const connectMongo = async () => {
     try {
         await client.connect();
-        // Usamos el nombre de la DB del .env o 'neon_survivor' por defecto
         db = client.db(process.env.DB_NAME || 'JocMatias');
         console.log('Conectado a MongoDB');
     } catch (error) {
@@ -16,7 +15,6 @@ const connectMongo = async () => {
     }
 };
 
-// Función para obtener la instancia de la base de datos desde los repositorios
 const getDb = () => db;
 
 module.exports = { connectMongo, getDb };

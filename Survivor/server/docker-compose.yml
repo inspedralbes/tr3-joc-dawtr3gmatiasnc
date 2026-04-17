@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: node_app_server
+    restart: always
+    ports:
+      - "3000:3000" # Mapea el puerto local 3000 al 3000 del contenedor
+    env_file:
+      - .env # Carga las variables de tu archivo .env
+    depends_on:
+      - mongo_db # Asegura que Mongo inicie antes que la app
+    networks:
+      - app_network
+
+  mongo_db:
+    image: mongo:latest
+    container_name: mongo_db
+    restart: always
+    ports:
+      - "27017:27017" # Para que puedas ver la DB con MongoDB Compass desde tu PC
+    volumes:
+      - mongo_data:/data/db # Guarda los datos para que no se borren al apagar Docker
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mongo_data:

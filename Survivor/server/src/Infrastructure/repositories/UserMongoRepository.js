@@ -1,7 +1,6 @@
 const { getDb } = require('../database/db');
 
 class UserMongoRepository {
-    // Helper para no repetir getDb().collection('users') en cada función
     getCollection() {
         return getDb().collection('users');
     }
