@@ -82,5 +82,4 @@ const startServer = async () => {
     }
 };
 
-// ¡Arrancamos el motor!
 startServer();
