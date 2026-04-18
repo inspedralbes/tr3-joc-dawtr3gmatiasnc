@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class VidaTrono : MonoBehaviour
 {
@@ -27,9 +28,11 @@ public class VidaTrono : MonoBehaviour
     {
         Debug.Log("¡EL TRONO HA SIDO DESTRUIDO! GAME OVER ");
         
-        // Esto congela el tiempo en Unity al instante, parando el juego.
-        Time.timeScale = 0f; 
+        // Es MUY importante restaurar el tiempo normal (1f) antes de cargar la escena
+        // porque si no la nueva escena cargará con el tiempo congelado.
+        Time.timeScale = 1f; 
         
-        // Más adelante, aquí podemos hacer que aparezca un menú de "Has Perdido"
+        // Cargamos la escena del Lobby
+        SceneManager.LoadScene("Lobby"); 
     }
 }

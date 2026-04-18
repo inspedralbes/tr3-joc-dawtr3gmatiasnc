@@ -55,6 +55,15 @@ public class LoginController : MonoBehaviour
             };
         }
 
+        // Botón Multijugador -> Ir al Lobby
+        var multiplayerButton = root.Q<Button>("multiplayer-button");
+        if (multiplayerButton != null)
+        {
+            multiplayerButton.clicked += () => {
+                SceneManager.LoadScene("Lobby"); // Nombre de la nueva escena que crearemos
+            };
+        }
+
         // Botón Logout -> Volver atrás
         if (logoutButton != null)
         {
@@ -85,6 +94,11 @@ public class LoginController : MonoBehaviour
 
         if (request.result == UnityWebRequest.Result.Success) {
             statusLabel.text = "¡Éxito!";
+            
+            // Guardamos el usuario para usarlo en el WebSocket o en las salas
+            PlayerPrefs.SetString("username", usernameField.value);
+            PlayerPrefs.Save();
+            
             loginPanel.style.display = DisplayStyle.None;
             menuPanel.style.display = DisplayStyle.Flex;
         } else {

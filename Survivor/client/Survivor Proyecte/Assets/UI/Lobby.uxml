@@ -1,0 +1,40 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    
+    <Style src="project:/Assets/UI/LoginStyles.uss" />
+    <Style src="project:/Assets/UI/LobbyStyles.uss" />
+    
+    <ui:VisualElement class="main-container">
+        <ui:VisualElement class="lobby-panel">
+            
+            <ui:Label text="TABERNA MULTIJUGADOR" class="menu-header" />
+            <ui:VisualElement class="separator-gold" />
+
+            <ui:VisualElement class="lobby-content">
+                <ui:VisualElement class="rooms-list-container">
+                    <ui:Label text="SALAS DISPONIBLES" class="section-title" />
+                    <ui:Button text="Actualizar Lista" name="refresh-button" class="btn-medieval btn-small" />
+                    <ui:ScrollView name="rooms-scrollview" class="rooms-scroll" />
+                </ui:VisualElement>
+
+                <ui:VisualElement class="actions-container">
+                    
+                    <ui:VisualElement class="action-box">
+                        <ui:Label text="FORMAR GRUPO" class="section-title" />
+                        <ui:TextField label="Nombre de la sala:" name="create-room-input" class="input-field" />
+                        <ui:Button text="CREAR SALA" name="create-button" class="btn-medieval btn-login" />
+                    </ui:VisualElement>
+
+                    <ui:VisualElement class="action-box" style="margin-top: 30px;">
+                        <ui:Label text="UNIRSE POR CÓDIGO" class="section-title" />
+                        <ui:TextField label="Código (ID):" name="join-room-input" class="input-field" />
+                        <ui:Button text="UNIRSE" name="join-button" class="btn-medieval btn-register" />
+                    </ui:VisualElement>
+
+                </ui:VisualElement>
+            </ui:VisualElement>
+
+            <ui:Button text="VOLVER AL MENÚ" name="back-button" class="btn-logout" style="margin-top: 20px;" />
+
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

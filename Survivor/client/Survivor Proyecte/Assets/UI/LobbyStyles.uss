@@ -1,0 +1,79 @@
+/* Panel principal del Lobby, más ancho para que quepan dos columnas */
+.lobby-panel {
+    background-color: rgb(45, 30, 20);
+    border-width: 4px;
+    border-color: rgb(150, 110, 50);
+    border-radius: 8px;
+    padding: 30px;
+    width: 800px;
+    align-items: center;
+}
+
+/* Contenedor que divide la pantalla en dos columnas */
+.lobby-content {
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+}
+
+/* Columna Izquierda */
+.rooms-list-container {
+    width: 55%;
+    background-color: rgba(20, 15, 10, 0.5);
+    border-color: rgb(100, 70, 40);
+    border-width: 2px;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+/* Columna Derecha */
+.actions-container {
+    width: 40%;
+    justify-content: flex-start;
+}
+
+.action-box {
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 5px;
+    border-width: 1px;
+    border-color: rgb(100, 70, 40);
+}
+
+.section-title {
+    color: rgb(220, 180, 90);
+    -unity-font-style: bold;
+    font-size: 18px;
+    margin-bottom: 10px;
+    -unity-text-align: middle-center;
+}
+
+.rooms-scroll {
+    height: 300px;
+    margin-top: 10px;
+}
+
+/* Estilo para cada sala individual (creada por código) */
+.room-item {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgb(60, 45, 35);
+    border-color: rgb(150, 110, 50);
+    border-width: 1px;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 8px;
+}
+
+.room-item-text {
+    color: rgb(230, 210, 170);
+    -unity-font-style: bold;
+    font-size: 14px;
+}
+
+.btn-small {
+    padding: 5px 10px;
+    font-size: 12px;
+    margin-top: 0;
+}
