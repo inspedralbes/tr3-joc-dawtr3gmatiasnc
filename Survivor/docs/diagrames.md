@@ -7,24 +7,25 @@ A continuació es presenten els diagrames requerits per a la documentació del p
 Aquest diagrama mostra les accions principals que pot fer el jugador dins del joc.
 
 ```mermaid
-usecaseDiagram
-    actor Jugador
+flowchart LR
+    Jugador([Jugador])
 
-    package "Videojoc Survivor" {
-        usecase "Registrar-se / Fer Login" as UC1
-        usecase "Crear una Sala" as UC2
-        usecase "Unir-se a una Sala" as UC3
-        usecase "Moure el personatge" as UC4
-        usecase "Atacar" as UC5
-        usecase "Guardar Resultats al guanyar" as UC6
-    }
+    subgraph Videojoc Survivor
+        direction TB
+        UC1([Registrar-se / Fer Login])
+        UC2([Crear una Sala])
+        UC3([Unir-se a una Sala])
+        UC4([Moure el personatge])
+        UC5([Atacar])
+        UC6([Guardar Resultats al guanyar])
+    end
 
     Jugador --> UC1
     Jugador --> UC2
     Jugador --> UC3
     Jugador --> UC4
     Jugador --> UC5
-    UC5 --> UC6 : En cas de victòria
+    UC5 -->|En cas de victòria| UC6
 ```
 
 ---
