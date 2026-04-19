@@ -53,8 +53,9 @@ const startServer = async () => {
 
         const userService = new UserService(userRepository);
         const gameService = new GameService(gameRepository);
-        // ScoreService necesita GameService para poder cerrar la partida cuando se guarda la puntuación
         const scoreService = new ScoreService(scoreRepository, gameService);
+        socketServer.setScoreService(scoreService); // Injecció del servei de punts al WebSocket
+        socketServer.setGameService(gameService);   // Injecció del servei de partides al WebSocket
 
         const userController = new UserController(userService);
         const gameController = new GameController(gameService);

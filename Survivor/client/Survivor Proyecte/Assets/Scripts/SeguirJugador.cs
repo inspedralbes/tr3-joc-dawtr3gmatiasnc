@@ -6,13 +6,12 @@ public class SeguirJugador : MonoBehaviour
     public Transform objetivo;
     public float velocidadSuavizado = 10f;
 
-    [Header("Límites del Mapa (¡NUEVO!)")]
-    [Tooltip("Activa esto para que la cámara no salga del mapa")]
+    [Header("Límites del Mapa")]
     public bool usarLimites = true;
-    public float limiteMinX = -10f; // Tope izquierdo
-    public float limiteMaxX = 10f;  // Tope derecho
-    public float limiteMinY = -10f; // Tope inferior
-    public float limiteMaxY = 10f;  // Tope superior
+    public float limiteMinX = -10f;
+    public float limiteMaxX = 10f;
+    public float limiteMinY = -10f;
+    public float limiteMaxY = 10f;
 
     [Header("Poder de Desarrollador (Zoom)")]
     public Camera miCamara;
@@ -22,35 +21,26 @@ public class SeguirJugador : MonoBehaviour
     void Start()
     {
         miCamara = GetComponent<Camera>();
-        if (objetivo == null)
-        {
-            GameObject jugador = GameObject.Find("Soldado1");
-            if (jugador != null) objetivo = jugador.transform;
-        }
+        // El objetivo ahora se asigna automáticamente desde el script del jugador
     }
 
     void LateUpdate()
     {
         if (objetivo != null)
         {
-            // 1. Capturamos la posición a la que quiere ir la cámara
             float posX = objetivo.position.x;
             float posY = objetivo.position.y;
 
-            // 2. APLICAMOS LA MAGIA (Los Límites)
             if (usarLimites)
             {
-                // Mathf.Clamp obliga a la variable a no pasarse de un mínimo o un máximo
                 posX = Mathf.Clamp(posX, limiteMinX, limiteMaxX);
                 posY = Mathf.Clamp(posY, limiteMinY, limiteMaxY);
             }
 
-            // 3. Movemos la cámara a esa posición limitada
             Vector3 posicionDestino = new Vector3(posX, posY, transform.position.z);
             transform.position = Vector3.Lerp(transform.position, posicionDestino, velocidadSuavizado * Time.deltaTime);
         }
 
-        // Sistema de Zoom
         if (miCamara != null)
         {
             if (Input.GetKey(KeyCode.Z))

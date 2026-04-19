@@ -350,6 +350,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   serverUrl: ws://localhost:3000
+  prefabCaballero: {fileID: 185381923356537932, guid: 25179bbf3b0824e4d88f5a26f1476226, type: 3}
+  soyHost: 0
 --- !u!4 &1007995575
 Transform:
   m_ObjectHideFlags: 0

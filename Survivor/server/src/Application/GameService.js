@@ -5,9 +5,9 @@ class GameService {
         this.gameRepository = gameRepository;
     }
 
-    async startGame() {
+    async startGame(gameId = null) {
         const newGame = {
-            id: uuidv4(),
+            id: gameId || uuidv4(),
             status: 'PLAYING',
             started_at: new Date()
         };
