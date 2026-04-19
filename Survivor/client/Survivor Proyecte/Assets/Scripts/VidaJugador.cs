@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class VidaTrono : MonoBehaviour
+public class VidaJugador : MonoBehaviour
 {
     [SerializeField] private int vidaMaxima = 10;
     private int vidaActual;
@@ -14,7 +14,7 @@ public class VidaTrono : MonoBehaviour
     public void RecibirDaño(int cantidad)
     {
         vidaActual -= cantidad;
-        Debug.Log("¡El trono ha recibido daño! Vida restante: " + vidaActual);
+        Debug.Log("¡El jugador ha recibido daño! Vida restante: " + vidaActual);
 
         if (vidaActual <= 0)
         {
@@ -24,9 +24,9 @@ public class VidaTrono : MonoBehaviour
 
     void PerderJuego()
     {
-        Debug.Log("¡EL TRONO HA SIDO DESTRUIDO! GAME OVER ");
+        Debug.Log("¡EL JUGADOR HA MUERTO! GAME OVER ");
         
-       
+
         Time.timeScale = 1f; 
         
         SceneManager.LoadScene("Lobby"); 

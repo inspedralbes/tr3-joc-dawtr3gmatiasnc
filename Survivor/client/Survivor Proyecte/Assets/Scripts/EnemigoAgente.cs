@@ -7,8 +7,12 @@ public class EnemigoAgente : Agent
 {
     [Header("Configuración Principal")]
     public Transform objetivo; 
+    public Transform jugador; // Nova variable pel sistema d'Aggro
+    public float radioAggro = 5f; // Radi de detecció
     public float velocidadMovimiento = 5f;
     
+    private Transform objectiuActual; // Variable de control per saber si ataquem Trono o Jugador
+
     // Variables de ataque
     private float tiempoUltimoAtaque;
     public float velocidadAtaque = 1f; // Pega 1 hachazo por segundo
@@ -31,6 +35,31 @@ public class EnemigoAgente : Agent
             GameObject t = GameObject.FindGameObjectWithTag("Trono");
             if (t != null) objetivo = t.transform;
         }
+
+        objectiuActual = objetivo; // Per defecte és el trono
+
+        if (jugador == null) {
+            GameObject j = GameObject.FindGameObjectWithTag("Player");
+            if (j != null) jugador = j.transform;
+        }
+    }
+
+    // Nou mètode per avaluar distàncies i decidir objectiu
+    private void ActualizarObjetivo()
+    {
+        if (jugador != null)
+        {
+            float dist = Vector2.Distance(transform.position, jugador.position);
+            if (dist <= radioAggro) {
+                objectiuActual = jugador;
+            } else {
+                objectiuActual = objetivo;
+            }
+        }
+        else 
+        {
+            objectiuActual = objetivo;
+        }
     }
 
     public override void OnEpisodeBegin()
@@ -42,8 +71,10 @@ public class EnemigoAgente : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
+        ActualizarObjetivo();
+
         // Seguro anti-destrucción: si el trono o el enemigo mueren, rellenamos con ceros para no dar error
-        if (objetivo == null || this == null || gameObject == null) 
+        if (objectiuActual == null || this == null || gameObject == null) 
         {
             sensor.AddObservation(0f);
             sensor.AddObservation(0f);
@@ -53,7 +84,7 @@ public class EnemigoAgente : Agent
         }
 
         // Observaciones reales
-        Vector2 direccion = (objetivo.position - transform.position).normalized;
+        Vector2 direccion = (objectiuActual.position - transform.position).normalized;
         sensor.AddObservation(direccion.x);
         sensor.AddObservation(direccion.y);
 
@@ -81,7 +112,7 @@ public class EnemigoAgente : Agent
             spriteRenderer.flipX = true;  // Mira a la izquierda
         }
 
-        float distancia = Vector2.Distance(transform.position, objetivo.position);
+        float distancia = Vector2.Distance(transform.position, objectiuActual.position);
         if (distancia < 10f) {
             AddReward(0.001f); 
         } else {
@@ -113,12 +144,33 @@ public class EnemigoAgente : Agent
                 tiempoUltimoAtaque = Time.time;
             }
         }
+        else if (collision.gameObject.CompareTag("Player"))
+        {
+            if (anim != null) {
+                anim.SetBool("Atacando", true);
+            }
+
+            if (Time.time >= tiempoUltimoAtaque + velocidadAtaque)
+            {
+                VidaJugador scriptVida = collision.gameObject.GetComponent<VidaJugador>();
+                if (scriptVida != null)
+                {
+                    scriptVida.RecibirDaño(1);
+                }
+                else
+                {
+                    Debug.LogWarning("El jugador no té el script VidaJugador assignat!");
+                }
+                
+                tiempoUltimoAtaque = Time.time;
+            }
+        }
     }
 
     private void OnCollisionExit2D(Collision2D collision)
     {
         // Si el orco es empujado y deja de tocar el trono, apagamos la animación
-        if (collision.gameObject.CompareTag("Trono")) 
+        if (collision.gameObject.CompareTag("Trono") || collision.gameObject.CompareTag("Player")) 
         {
             if (anim != null) {
                 anim.SetBool("Atacando", false);

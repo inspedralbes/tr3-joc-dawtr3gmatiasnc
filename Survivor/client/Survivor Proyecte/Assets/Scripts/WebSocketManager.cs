@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using NativeWebSocket; // Requiere importar el paquete NativeWebSocket
-
+using NativeWebSocket;
 [System.Serializable]
 public class WsMessage
 {
@@ -38,7 +37,6 @@ public class WebSocketManager : MonoBehaviour
     WebSocket websocket;
     private string playerId;
     
-    // Aquí puedes cambiar a la IP de tu servidor si no juegas en local
     public string serverUrl = "ws://localhost:8080"; 
 
     public event Action<List<RoomData>> OnRoomListReceived;
@@ -46,7 +44,6 @@ public class WebSocketManager : MonoBehaviour
 
     private void Awake()
     {
-        // Patrón Singleton para acceder desde cualquier script
         if (Instance != null && Instance != this)
         {
             Destroy(this.gameObject);
@@ -60,7 +57,6 @@ public class WebSocketManager : MonoBehaviour
 
     async void Start()
     {
-        // Recuperamos el nombre de usuario que guardamos en el Login
         playerId = PlayerPrefs.GetString("username", "Jugador_" + UnityEngine.Random.Range(1000, 9999));
 
         websocket = new WebSocket(serverUrl);
@@ -86,7 +82,6 @@ public class WebSocketManager : MonoBehaviour
             HandleIncomingMessage(message);
         };
 
-        // Esperamos a que se conecte
         await websocket.Connect();
     }
 
@@ -102,25 +97,21 @@ public class WebSocketManager : MonoBehaviour
 
     private void HandleIncomingMessage(string json)
     {
-        // Deserializamos el tipo de mensaje para saber qué hacer
         WsMessage data = JsonUtility.FromJson<WsMessage>(json);
 
         switch (data.type)
         {
             case "ROOM_CREATED":
                 Debug.Log($"Sala creada exitosamente. Tu código es: {data.roomId}");
-                // AGREGAR ESTA LÍNEA: Unity pide unirse a la sala automáticamente tras crearla
                 JoinRoom(data.roomId);
                 break;
 
             case "ROOMS_LIST":
                 WsRoomsList roomList = JsonUtility.FromJson<WsRoomsList>(json);
-                // Avisamos a la UI de que hay nuevas salas
                 OnRoomListReceived?.Invoke(roomList.rooms);
                 break;
 
             case "JOINED_ROOM":
-                // Avisamos a la UI de que entramos a la sala
                 OnRoomJoined?.Invoke(data.roomId);
                 break;
 
@@ -137,13 +128,11 @@ public class WebSocketManager : MonoBehaviour
                 break;
                 
             case "MOVE":
-                // Aquí llega el movimiento de otro jugador
-                // Debug.Log($"El jugador movió a X:{data.x} Y:{data.y}");
+                
                 break;
         }
     }
 
-    // --- MÉTODOS PÚBLICOS PARA LLAMAR DESDE OTROS SCRIPTS (BOTONES DE LA UI) ---
 
     public async void CreateRoom(string roomName)
     {
