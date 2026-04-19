@@ -11,7 +11,7 @@ public class AuthManager : MonoBehaviour
     public InputField passwordInput;
     public Text statusText;
 
-    private string backendUrl = "http://localhost:3000/api/users";
+    private string backendUrl = "http://89.167.73.56:3000/api/users";
 
     public void OnLoginClick() {
         StartCoroutine(SendAuthRequest("/login"));

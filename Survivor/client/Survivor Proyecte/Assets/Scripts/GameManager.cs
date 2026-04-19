@@ -46,6 +46,8 @@ public class GameManager : MonoBehaviour
 
     public void RegistrarMuerte(bool soyYoElMuerto)
     {
+        if (!partidaEmpezada) return; // Evita registrar muertes si el juego ya terminó y estamos esperando a salir
+
         if (soyYoElMuerto) puntosRival++;
         else puntosMios++;
 
@@ -78,8 +80,12 @@ public class GameManager : MonoBehaviour
         // Esperem 3 segons per veure el missatge
         yield return new WaitForSeconds(3f);
 
-        // Desconnectem de la sala manualment tancant el socket (ja ho farà el script si ens sortim, però és bona pràctica)
-        // I carreguem el Lobby de nou
+        if (WebSocketManager.Instance != null)
+        {
+            WebSocketManager.Instance.LeaveRoomAndReset();
+        }
+
+        // Carreguem el Lobby de nou
         SceneManager.LoadScene("Lobby");
     }
 
@@ -87,15 +93,23 @@ public class GameManager : MonoBehaviour
     {
         MovimientoCaballero[] jugadores = Object.FindObjectsByType<MovimientoCaballero>(FindObjectsSortMode.None);
         
+        bool soyHost = false;
+        if (WebSocketManager.Instance != null) soyHost = WebSocketManager.Instance.soyHost;
+
         foreach (var jugador in jugadores)
         {
+            MovimientoCaballero mov = jugador.GetComponent<MovimientoCaballero>();
+            if (mov == null) continue;
+
             if (jugador.esMiJugador) 
             {
-                jugador.transform.position = spawnJugador1.position;
+                mov.ForzarPosicion(soyHost ? spawnJugador1.position : spawnJugador2.position);
+                VidaJugador vida = mov.GetComponent<VidaJugador>();
+                if (vida != null) vida.HacerInvulnerable(1.5f); // 1.5s de inmunidad al respawnear
             }
             else
             {
-                jugador.transform.position = spawnJugador2.position;
+                mov.ForzarPosicion(soyHost ? spawnJugador2.position : spawnJugador1.position);
             }
         }
     }

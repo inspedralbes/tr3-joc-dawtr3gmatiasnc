@@ -349,7 +349,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1cd2087b973c7174384a5850ffae30d5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  serverUrl: ws://localhost:3000
+  serverUrl: ws://89.167.73.56:3000
   prefabCaballero: {fileID: 185381923356537932, guid: 25179bbf3b0824e4d88f5a26f1476226, type: 3}
   soyHost: 0
 --- !u!4 &1007995575

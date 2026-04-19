@@ -4,19 +4,39 @@ public class AtaqueJugador : MonoBehaviour
 {
     public int dano = 1;
 
-    // Esta función de Unity se activa SOLA cuando este Trigger toca a otro colisionador
     void OnTriggerEnter2D(Collider2D otroObjeto)
     {
-        // 1. ¿Es un enemigo?
+        // Evitamos hacernos daño a nosotros mismos (cualquier padre/raiz)
+        if (transform.root == otroObjeto.transform.root) return;
+
+        // 1. ¿Es un enemigo normal (IA)?
         if (otroObjeto.CompareTag("Enemigo"))
         {
-            // 2. Buscamos el script de Vida en ese enemigo
             VidaEnemigo vida = otroObjeto.GetComponent<VidaEnemigo>();
+            if (vida != null) vida.RecibirDano(dano);
+        }
 
-            // 3. Si lo tiene, le hacemos daño
-            if (vida != null)
+        // 2. ¿Es el otro jugador (PvP)?
+        if (otroObjeto.CompareTag("Player") || otroObjeto.GetComponent<VidaJugador>() != null)
+        {
+            VidaJugador vidaJ = otroObjeto.GetComponent<VidaJugador>();
+            MovimientoCaballero mov = otroObjeto.GetComponent<MovimientoCaballero>();
+
+            if (vidaJ != null && mov != null)
             {
-                vida.RecibirDano(dano);
+                if (!mov.esMiJugador) 
+                {
+                    // Multijugador: He golpeado al rival visualmente en mi pantalla. Le aviso por red.
+                    if (WebSocketManager.Instance != null)
+                    {
+                        WebSocketManager.Instance.SendNetworkMessage("ATTACK", "HIT");
+                    }
+                }
+                else
+                {
+                    // Singleplayer o la IA me pega a mí
+                    vidaJ.RecibirDaño(dano);
+                }
             }
         }
     }

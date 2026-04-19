@@ -19,11 +19,18 @@ public class MovimientoCaballero : MonoBehaviour
 
     private Vector2 ultimaDireccion = Vector2.right;
     private Collider2D colisionadorDaño;
+    private Vector2 posicionObjetivo; // NUEVO: Para el movimiento suave en red
+    private bool seEstabaMoviendo = false; // NUEVO: Para enviar el último paquete de parada
+    private float tiempoParado = 0f; // NUEVO: Ping de posición
 
-    void Start()
+    private bool inicializado = false;
+
+    public void Inicializar(bool esMio)
     {
-        // Forcem ser el nostre jugador en cas que estiguem jugant al mode solitari (sense WebSockets)
-        if (WebSocketManager.Instance == null) esMiJugador = true;
+        if (inicializado) return;
+        inicializado = true;
+
+        esMiJugador = esMio;
 
         rb = GetComponent<Rigidbody2D>();
         anim = GetComponent<Animator>();
@@ -52,7 +59,15 @@ public class MovimientoCaballero : MonoBehaviour
         {
             spriteRenderer.color = new Color(1f, 0.5f, 0.5f); 
             rb.isKinematic = true; 
+            posicionObjetivo = transform.position; 
         }
+    }
+
+    void Start()
+    {
+        // Forzar inicialización local en caso de un jugador en solitario
+        if (WebSocketManager.Instance == null) esMiJugador = true;
+        Inicializar(esMiJugador);
     }
 
     void Update()
@@ -61,6 +76,8 @@ public class MovimientoCaballero : MonoBehaviour
 
         if (!esMiJugador)
         {
+            // Mover suavemente hacia la posición recibida del servidor
+            transform.position = Vector3.Lerp(transform.position, posicionObjetivo, Time.deltaTime * 15f);
             ActualizarPosicionAtaque();
             return; 
         }
@@ -105,9 +122,32 @@ public class MovimientoCaballero : MonoBehaviour
         
         rb.linearVelocity = direccionMovimiento * velocidad;
 
-        if (direccionMovimiento.magnitude > 0 && WebSocketManager.Instance != null)
+        if (WebSocketManager.Instance != null)
         {
-            WebSocketManager.Instance.SendMove(transform.position.x, transform.position.y, ultimaDireccion.x, ultimaDireccion.y);
+            bool seMueve = direccionMovimiento.magnitude > 0;
+            if (seMueve)
+            {
+                WebSocketManager.Instance.SendMove(transform.position.x, transform.position.y, ultimaDireccion.x, ultimaDireccion.y);
+                seEstabaMoviendo = true;
+                tiempoParado = 0f;
+            }
+            else 
+            {
+                if (seEstabaMoviendo)
+                {
+                    // Acabamos de parar. Enviamos un último paquete con dirección cero para detener la animación en el otro PC.
+                    WebSocketManager.Instance.SendMove(transform.position.x, transform.position.y, 0, 0);
+                    seEstabaMoviendo = false;
+                }
+
+                // Ping de posición cada segundo para asegurar que el otro jugador nos vea si acaba de cargar la escena
+                tiempoParado += Time.fixedDeltaTime;
+                if (tiempoParado > 1f)
+                {
+                    tiempoParado = 0f;
+                    WebSocketManager.Instance.SendMove(transform.position.x, transform.position.y, 0, 0);
+                }
+            }
         }
     }
 
@@ -153,9 +193,23 @@ public class MovimientoCaballero : MonoBehaviour
     {
         if (esMiJugador) return;
 
-        transform.position = Vector3.Lerp(transform.position, nuevaPosicion, Time.deltaTime * 15f);
-        ultimaDireccion = nuevaDireccion;
+        posicionObjetivo = nuevaPosicion; // Guardamos el objetivo, el Lerp se hace en el Update
         
-        anim.SetBool("caminando", (nuevaDireccion.magnitude > 0));
+        // Si nos envían una dirección (es decir, se está moviendo), la actualizamos
+        if (nuevaDireccion.magnitude > 0)
+        {
+            ultimaDireccion = nuevaDireccion;
+            anim.SetBool("caminando", true);
+        }
+        else
+        {
+            anim.SetBool("caminando", false); // Si la dirección es cero, es que se ha parado
+        }
+    }
+
+    public void ForzarPosicion(Vector2 pos)
+    {
+        transform.position = pos;
+        if (!esMiJugador) posicionObjetivo = pos;
     }
 }

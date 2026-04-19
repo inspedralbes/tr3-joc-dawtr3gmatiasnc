@@ -40,7 +40,9 @@ public class WebSocketManager : MonoBehaviour
     WebSocket websocket;
     private string playerId;
     
-    public string serverUrl = "ws://localhost:3000"; 
+    public string serverUrl = "ws://89.167.73.56:3000"; 
+    
+    private bool enemigoSpawneado = false; // NUEVO: Evitar doble spawn
 
     public event Action<List<RoomData>> OnRoomListReceived;
     public event Action<string> OnRoomJoined;
@@ -102,6 +104,7 @@ public class WebSocketManager : MonoBehaviour
                 break;
 
             case "JOINED_ROOM":
+                enemigoSpawneado = false; // Reseteamos al unirnos a la sala
                 OnRoomJoined?.Invoke(data.roomId);
                 
                 // MAGIA: APAREZCO YO (Amb Corrutina per esperar a que carregui l'escena)
@@ -131,8 +134,30 @@ public class WebSocketManager : MonoBehaviour
             case "ATTACK":
                 if (data.playerId != this.playerId)
                 {
-                    MovimientoCaballero enemigo = BuscarEnemigo();
-                    if (enemigo != null) enemigo.RealizarAtaque();
+                    if (data.message == "DEATH") 
+                    {
+                        if (GameManager.Instancia != null) GameManager.Instancia.RegistrarMuerte(false);
+                    }
+                    else if (data.message == "HIT")
+                    {
+                        // El rival dice que me ha dado un golpe en su pantalla
+                        MovimientoCaballero[] jugadores = UnityEngine.Object.FindObjectsByType<MovimientoCaballero>(FindObjectsSortMode.None);
+                        foreach (var j in jugadores)
+                        {
+                            if (j.esMiJugador)
+                            {
+                                VidaJugador vida = j.GetComponent<VidaJugador>();
+                                if (vida != null) vida.RecibirDaño(1); // o el daño base
+                                break;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Solo es la animación de ataque
+                        MovimientoCaballero enemigo = BuscarEnemigo();
+                        if (enemigo != null) enemigo.RealizarAtaque();
+                    }
                 }
                 break;
         }
@@ -148,12 +173,14 @@ public class WebSocketManager : MonoBehaviour
         }
         
         // MAGIA: APARECE EL ENEMIGO (Para el que se acaba de unir a la sala, lo carga en cuanto el otro se mueva)
-        if (prefabCaballero != null && GameManager.Instancia != null)
+        if (!enemigoSpawneado && prefabCaballero != null && GameManager.Instancia != null)
         {
+            enemigoSpawneado = true;
             Transform spawnRival = soyHost ? GameManager.Instancia.spawnJugador2 : GameManager.Instancia.spawnJugador1;
             GameObject enemigo = Instantiate(prefabCaballero, spawnRival.position, Quaternion.identity);
             MovimientoCaballero script = enemigo.GetComponent<MovimientoCaballero>();
-            script.esMiJugador = false;
+            script.Inicializar(false);
+            script.ForzarPosicion(spawnRival.position);
             return script;
         }
         
@@ -173,7 +200,7 @@ public class WebSocketManager : MonoBehaviour
         {
             Transform miSpawn = soyHost ? GameManager.Instancia.spawnJugador1 : GameManager.Instancia.spawnJugador2;
             GameObject yo = Instantiate(prefabCaballero, miSpawn.position, Quaternion.identity);
-            yo.GetComponent<MovimientoCaballero>().esMiJugador = true;
+            yo.GetComponent<MovimientoCaballero>().Inicializar(true);
         }
     }
 
@@ -185,16 +212,20 @@ public class WebSocketManager : MonoBehaviour
         // Quan entra el rival, la partida COMENÇA per a tots dos
         GameManager.Instancia.partidaEmpezada = true;
 
-        if (prefabCaballero != null)
+        if (!enemigoSpawneado && prefabCaballero != null)
         {
+            enemigoSpawneado = true;
             Transform spawnRival = soyHost ? GameManager.Instancia.spawnJugador2 : GameManager.Instancia.spawnJugador1;
             GameObject enemigo = Instantiate(prefabCaballero, spawnRival.position, Quaternion.identity);
-            enemigo.GetComponent<MovimientoCaballero>().esMiJugador = false;
+            MovimientoCaballero script = enemigo.GetComponent<MovimientoCaballero>();
+            script.Inicializar(false);
+            script.ForzarPosicion(spawnRival.position);
         }
     }
 
     public async void CreateRoom(string roomName)
     {
+        this.playerId = PlayerPrefs.GetString("username", this.playerId); // Actualizamos por si hizo login
         if (websocket.State == WebSocketState.Open)
         {
             WsMessage msg = new WsMessage { type = "CREATE_ROOM", playerId = this.playerId, roomName = roomName };
@@ -204,6 +235,7 @@ public class WebSocketManager : MonoBehaviour
 
     public async void JoinRoom(string roomId)
     {
+        this.playerId = PlayerPrefs.GetString("username", this.playerId); // Actualizamos por si hizo login
         if (websocket.State == WebSocketState.Open)
         {
             WsMessage msg = new WsMessage { type = "JOIN_ROOM", playerId = this.playerId, roomId = roomId };
@@ -245,6 +277,32 @@ public class WebSocketManager : MonoBehaviour
             WsMessage msg = new WsMessage { type = "GAME_WON", playerId = this.playerId };
             await websocket.SendText(JsonUtility.ToJson(msg));
         }
+    }
+
+    public async void SendNetworkMessage(string tipo, string mensaje)
+    {
+        if (websocket.State == WebSocketState.Open)
+        {
+            WsMessage msg = new WsMessage { type = tipo, playerId = this.playerId, message = mensaje };
+            await websocket.SendText(JsonUtility.ToJson(msg));
+        }
+    }
+
+    public async void LeaveRoomAndReset()
+    {
+        if (websocket != null && websocket.State == WebSocketState.Open)
+        {
+            await websocket.Close(); // El server nos sacará y borrará la sala si queda vacía
+        }
+        
+        soyHost = false;
+        enemigoSpawneado = false;
+        
+        // Reconectamos para seguir usando el Lobby
+        websocket = new WebSocket(serverUrl);
+        websocket.OnOpen += () => Debug.Log("Reconectado!");
+        websocket.OnMessage += (bytes) => HandleIncomingMessage(System.Text.Encoding.UTF8.GetString(bytes));
+        await websocket.Connect();
     }
 
     private async void OnApplicationQuit()
