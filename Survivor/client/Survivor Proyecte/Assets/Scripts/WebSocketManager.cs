@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using NativeWebSocket;
-
 [System.Serializable]
 public class WsMessage
 {
@@ -15,6 +15,13 @@ public class WsMessage
     public float y;
     public float dirX; 
     public float dirY; 
+}
+
+[System.Serializable]
+public class WsScoreUpdate
+{
+    public string type;
+    // Usamos mensajes simples para el score por ahora o una estructura más compleja si es necesario
 }
 
 [System.Serializable]
@@ -46,6 +53,9 @@ public class WebSocketManager : MonoBehaviour
 
     public event Action<List<RoomData>> OnRoomListReceived;
     public event Action<string> OnRoomJoined;
+
+    [Header("UI References")]
+    public Text roomCodeText; // Arrastra aquí el texto de la UI donde quieres ver el código
 
     [Header("Configuración de Partida")]
     public GameObject prefabCaballero; // Arrastra tu Prefab aquí en el Inspector
@@ -95,6 +105,7 @@ public class WebSocketManager : MonoBehaviour
             case "ROOM_CREATED":
                 soyHost = true; // Yo creé la sala
                 Debug.Log($"Sala creada exitosamente. Tu código es: {data.roomId}");
+                if (roomCodeText != null) roomCodeText.text = "CÓDIGO: " + data.roomId;
                 JoinRoom(data.roomId);
                 break;
 
@@ -105,6 +116,7 @@ public class WebSocketManager : MonoBehaviour
 
             case "JOINED_ROOM":
                 enemigoSpawneado = false; // Reseteamos al unirnos a la sala
+                if (roomCodeText != null) roomCodeText.text = "SALA: " + data.roomId;
                 OnRoomJoined?.Invoke(data.roomId);
                 
                 // MAGIA: APAREZCO YO (Amb Corrutina per esperar a que carregui l'escena)

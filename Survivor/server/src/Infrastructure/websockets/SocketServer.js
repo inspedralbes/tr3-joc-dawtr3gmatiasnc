@@ -43,7 +43,8 @@ class SocketServer {
             switch (data.type) {
                 case 'CREATE_ROOM': {
                     console.log('Mensaje recibido: CREATE_ROOM');
-                    const newRoomId = data.roomId || `room-${Date.now()}`;
+                    // Generamos un código corto de 4 dígitos si no se proporciona uno
+                    const newRoomId = data.roomId || Math.floor(1000 + Math.random() * 9000).toString();
                     const roomName = data.roomName || `Sala de ${data.playerId || 'jugador'}`;
 
                     const newRoom = new Room(newRoomId, roomName);
@@ -61,17 +62,17 @@ class SocketServer {
                     if (this.gameService) {
                         try {
                             await this.gameService.startGame(newRoom.id);
-                        } catch(e) {
+                        } catch (e) {
                             console.error("Error guardant a GAMES: ", e);
                         }
                     }
 
                     // NUEVO: Asociamos al creador con la sala de inmediato en el servidor
                     if (data.playerId) {
-                        this.clients.set(ws, { 
-                            playerId: data.playerId, 
-                            roomId: newRoomId, 
-                            x: 0, y: 0, dirX: 1, dirY: 0 
+                        this.clients.set(ws, {
+                            playerId: data.playerId,
+                            roomId: newRoomId,
+                            x: 0, y: 0, dirX: 1, dirY: 0
                         });
                     }
 
@@ -110,9 +111,9 @@ class SocketServer {
                         // Opcional: Si el jugador ya estaba en la sala (p.ej. por reconexión), actualizamos su socket info
                         const existingInfo = this.clients.get(ws);
                         if (existingInfo && existingInfo.playerId === playerId && existingInfo.roomId === roomId) {
-                             ws.send(JSON.stringify({ type: 'JOINED_ROOM', roomId }));
+                            ws.send(JSON.stringify({ type: 'JOINED_ROOM', roomId }));
                         } else {
-                             ws.send(JSON.stringify({ type: 'ERROR', message: 'La sala està plena o ja hi ets' }));
+                            ws.send(JSON.stringify({ type: 'ERROR', message: 'La sala està plena o ja hi ets' }));
                         }
                     }
                     break;
@@ -133,11 +134,45 @@ class SocketServer {
                     }
                     break;
                 }
-                // --- NUEVO BLOQUE: GESTIÓN DE ATAQUES ---
                 case 'ATTACK': {
                     console.log('Mensaje recibido: ATTACK');
                     if (playerInfo.roomId) {
-                        // Reenviamos el mensaje de ataque a los demás en la sala
+                        const room = this.rooms.get(playerInfo.roomId);
+
+                        // --- NUEVO: RASTREO DE PUNTOS POR MUERTES ---
+                        if (data.message === 'DEATH' && room) {
+                            // Si alguien muere, buscamos al OTRO jugador en la sala para darle un punto
+                            const winnerId = room.players.find(id => id !== playerInfo.playerId);
+                            if (winnerId) {
+                                room.updateScore(winnerId, 1);
+                                console.log(`Punto para ${winnerId}. Score actual:`, room.scores);
+
+                                // Broadcast de la puntuación actualizada
+                                this.broadcastToRoom(playerInfo.roomId, null, {
+                                    type: 'SCORE_UPDATE',
+                                    scores: room.scores
+                                });
+
+                                // NUEVO: Victoria automática por puntos (mismo límite que en Unity: 3)
+                                if (room.scores[winnerId] >= 3) {
+                                    console.log(`¡${winnerId} ha ganado por alcanzar los 3 puntos!`);
+                                    if (this.scoreService) {
+                                        try {
+                                            await this.scoreService.savePlayerScore(playerInfo.roomId, winnerId, 0, 3);
+                                            this.broadcastToRoom(playerInfo.roomId, null, {
+                                                type: 'GAME_OVER',
+                                                winner: winnerId,
+                                                scores: room.scores
+                                            });
+                                        } catch (e) {
+                                            console.error("Error guardando victoria automática:", e);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // ---------------------------------------------
+
                         this.broadcastToRoom(playerInfo.roomId, ws, data);
                     } else {
                         this.broadcast(ws, data);
@@ -146,24 +181,24 @@ class SocketServer {
                 }
                 case 'GAME_WON': {
                     console.log('Mensaje recibido: GAME_WON');
-                    // Quan Unity ens avisi que un jugador ha guanyat, guardem el score a MongoDB
                     if (this.scoreService && playerInfo.roomId) {
                         try {
-                            // Utilitzem els paràmetres (gameId, userId, temps, nivellRebut) 
-                            // per guardar que aquest usuari ha guanyat la partida (3 punts = level 3 per ex)
                             await this.scoreService.savePlayerScore(playerInfo.roomId, data.playerId, 0, 3);
-                            console.log(`Puntuació de victòria desada a MongoDB per a l'usuari ${data.playerId}`);
-                            
-                            // LIMPIEZA: El jugador ya no está en partida, liberamos su estado de sala
-                            playerInfo.roomId = null;
-                            this.clients.set(ws, playerInfo);
+                            console.log(`Puntuació de victòria desada per a l'usuari ${data.playerId}`);
+
+                            // Avisamos a todos que ha terminado con el estado final
+                            const room = this.rooms.get(playerInfo.roomId);
+                            this.broadcastToRoom(playerInfo.roomId, null, {
+                                type: 'GAME_OVER',
+                                winner: data.playerId,
+                                scores: room ? room.scores : {}
+                            });
                         } catch (error) {
                             console.error("Error intentant guardar la puntuació:", error);
                         }
                     }
                     break;
                 }
-                // ----------------------------------------
                 case 'GET_ROOMS': {
                     const waitingRooms = await this.roomRepo.findWaitingRooms();
                     ws.send(JSON.stringify({
@@ -188,24 +223,29 @@ class SocketServer {
     async handleDisconnect(ws) {
         const playerInfo = this.clients.get(ws);
         if (playerInfo && playerInfo.roomId) {
-            const room = this.rooms.get(playerInfo.roomId);
-            if (room) {
-                room.removePlayer(playerInfo.playerId);
-                await this.roomRepo.removePlayerFromDb(playerInfo.roomId, playerInfo.playerId);
-
-                this.broadcastToRoom(playerInfo.roomId, ws, {
-                    type: 'PLAYER_LEFT',
-                    playerId: playerInfo.playerId
-                });
-
-                if (room.players.length === 0) {
-                    this.rooms.delete(playerInfo.roomId);
-                    await this.roomRepo.updateStatus(playerInfo.roomId, 'FINISHED');
-                    console.log(`Sala ${playerInfo.roomId} tancada per inactivitat.`);
-                }
-            }
+            await this.leaveRoom(ws, playerInfo.roomId, playerInfo.playerId);
         }
         this.clients.delete(ws);
+    }
+
+    async leaveRoom(ws, roomId, playerId) {
+        const room = this.rooms.get(roomId);
+        if (room) {
+            console.log(`Eliminando jugador ${playerId} de la sala ${roomId}`);
+            room.removePlayer(playerId);
+            await this.roomRepo.removePlayerFromDb(roomId, playerId);
+
+            this.broadcastToRoom(roomId, ws, {
+                type: 'PLAYER_LEFT',
+                playerId: playerId
+            });
+
+            if (room.players.length === 0) {
+                this.rooms.delete(roomId);
+                await this.roomRepo.updateStatus(roomId, 'FINISHED');
+                console.log(`Sala ${roomId} tancada y guardada como FINISHED.`);
+            }
+        }
     }
 
     broadcast(senderWs, data) {
