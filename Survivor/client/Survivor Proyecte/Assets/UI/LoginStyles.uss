@@ -1,0 +1,237 @@
+/* ========================================== */
+/* CONTENEDOR BASE                            */
+/* ========================================== */
+
+/* Contenedor Principal: Noche oscura / Fondo de taberna */
+.main-container {
+    flex-grow: 1;
+    background-color: rgb(20, 15, 10);
+    align-items: center;
+    justify-content: center;
+}
+
+/* ========================================== */
+/* SECCIÓN: PANEL DE LOGIN                    */
+/* ========================================== */
+
+/* Panel de Login: Aspecto de madera oscura con bordes dorados rústicos */
+.login-panel {
+    background-color: rgb(45, 30, 20);
+    border-width: 4px;
+    border-color: rgb(150, 110, 50); /* Oro oscuro / Latón */
+    border-radius: 8px; /* Menos redondeado que el futurista */
+    padding: 40px;
+    width: 380px;
+}
+
+/* Título: Letras doradas con sombra dura */
+.header {
+    font-size: 34px;
+    color: rgb(220, 180, 90);
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    letter-spacing: 2px;
+    margin-bottom: 5px;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.8);
+}
+
+/* Separador decorativo: Línea de latón */
+.separator {
+    height: 3px;
+    background-color: rgb(150, 110, 50);
+    margin-bottom: 30px;
+    margin-left: 30px;
+    margin-right: 30px;
+    border-radius: 2px;
+}
+
+/* Contenedores internos */
+.inputs-container {
+    margin-bottom: 25px;
+}
+
+.buttons-container {
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Inputs de Texto */
+.input-field {
+    flex-direction: column;
+    margin-bottom: 18px;
+}
+
+.input-field > .unity-label {
+    color: rgb(200, 170, 100);
+    -unity-font-style: bold;
+    font-size: 14px;
+    margin-bottom: 6px;
+    padding: 0;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.6);
+}
+
+/* Caja de texto: Aspecto de pergamino viejo */
+.input-field > .unity-text-field__input {
+    background-color: rgb(225, 215, 195);
+    border-width: 2px;
+    border-color: rgb(100, 70, 40);
+    border-radius: 2px; /* Muy cuadrado, estilo rústico */
+    padding: 10px 12px;
+    color: rgb(40, 30, 20); /* Texto de tinta oscura */
+    font-size: 15px;
+    -unity-font-style: bold;
+    transition-duration: 0.2s;
+}
+
+/* Efecto Focus al escribir */
+.input-field > .unity-text-field__input:focus {
+    border-color: rgb(180, 130, 40); /* Brillo dorado */
+    background-color: rgb(245, 235, 215); /* Pergamino más limpio */
+}
+
+/* Etiqueta de Estado */
+.status-label {
+    margin-top: 25px;
+    color: rgb(160, 130, 80);
+    -unity-text-align: middle-center;
+    font-size: 13px;
+    -unity-font-style: italic;
+}
+
+
+/* ========================================== */
+/* SECCIÓN: MENÚ PRINCIPAL                    */
+/* ========================================== */
+
+/* Panel de Menú: Más ancho que el de login */
+.menu-panel {
+    background-color: rgb(45, 30, 20);
+    border-width: 4px;
+    border-color: rgb(150, 110, 50);
+    border-radius: 8px;
+    padding: 50px;
+    width: 500px;
+    align-items: center; /* Centra el contenido interior */
+}
+
+/* Título del menú más grande y épico */
+.menu-header {
+    font-size: 48px;
+    color: rgb(220, 180, 90);
+    -unity-font-style: bold;
+    text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.9);
+    margin-bottom: 5px;
+}
+
+/* Separador un poco más ancho para el menú */
+.separator-gold {
+    height: 4px;
+    width: 80%;
+    background-color: rgb(180, 140, 60);
+    margin-bottom: 40px;
+    margin-top: 10px;
+    border-radius: 2px;
+}
+
+.options-container {
+    width: 100%;
+    margin-bottom: 30px;
+}
+
+
+/* ========================================== */
+/* SISTEMA DE BOTONES GLOBALES                */
+/* ========================================== */
+
+/* Botones Base Compartidos (Ambas pantallas los usan) */
+.btn-medieval {
+    border-width: 3px;
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 12px;
+    margin-bottom: 0;
+    font-size: 16px;
+    -unity-font-style: bold;
+    transition-duration: 0.15s;
+    cursor: link; /* Fix del cursor aplicado aquí */
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.7);
+}
+
+/* --- Botones Específicos del Login --- */
+
+/* Botón Entrar: Rojo Estandarte */
+.btn-login {
+    background-color: rgb(110, 25, 25);
+    border-color: rgb(180, 130, 40);
+    color: rgb(240, 210, 150);
+}
+
+.btn-login:hover {
+    background-color: rgb(140, 35, 35);
+    color: rgb(255, 230, 180);
+    scale: 1.02;
+}
+
+.btn-login:active {
+    background-color: rgb(80, 15, 15);
+    border-color: rgb(130, 90, 25);
+    scale: 0.98;
+}
+
+/* Botón Alistarse: Madera desgastada / Cuero */
+.btn-register {
+    background-color: rgb(60, 45, 35);
+    border-color: rgb(100, 70, 40);
+    color: rgb(200, 170, 100);
+}
+
+.btn-register:hover {
+    background-color: rgb(80, 60, 45);
+    color: rgb(230, 200, 130);
+    border-color: rgb(130, 90, 50);
+    scale: 1.02;
+}
+
+.btn-register:active {
+    background-color: rgb(40, 30, 20);
+    scale: 0.98;
+}
+
+/* --- Botones Específicos del Menú --- */
+
+/* Botones Grandes de Selección de Modo (Heredan de .btn-medieval) */
+.btn-large {
+    height: 80px;
+    font-size: 24px;
+    margin-bottom: 20px;
+    background-color: rgb(90, 20, 20);
+    border-color: rgb(200, 160, 80);
+    color: rgb(255, 230, 180);
+}
+
+.btn-large:hover {
+    background-color: rgb(120, 30, 30);
+    scale: 1.05;
+}
+
+.btn-large:active {
+    background-color: rgb(60, 15, 15);
+    scale: 0.98;
+}
+
+/* Botón de Cerrar Sesión (Texto simple que parece un enlace) */
+.btn-logout {
+    background-color: transparent;
+    border-width: 0;
+    color: rgb(160, 130, 80);
+    font-size: 14px;
+    -unity-font-style: italic;
+    cursor: link;
+    margin-top: 10px;
+    transition-duration: 0.2s;
+}
+
+.btn-logout:hover {
+    color: rgb(200, 50, 50); /* Se vuelve rojo sangre al pasar el ratón */
+    scale: 1.05;
+}
