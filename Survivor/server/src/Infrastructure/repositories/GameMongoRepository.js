@@ -14,6 +14,7 @@ class GameMongoRepository {
         };
 
         await this.getCollection().insertOne(newGame);
+        console.log(`[Mongo] Partida registrada con éxito: ${newGame.id}`);
         return newGame;
     }
 

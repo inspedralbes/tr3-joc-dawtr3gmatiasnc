@@ -42,6 +42,7 @@ class SocketServer {
 
             switch (data.type) {
                 case 'CREATE_ROOM': {
+                    console.log('Mensaje recibido: CREATE_ROOM');
                     const newRoomId = data.roomId || `room-${Date.now()}`;
                     const roomName = data.roomName || `Sala de ${data.playerId || 'jugador'}`;
 
@@ -65,11 +66,21 @@ class SocketServer {
                         }
                     }
 
+                    // NUEVO: Asociamos al creador con la sala de inmediato en el servidor
+                    if (data.playerId) {
+                        this.clients.set(ws, { 
+                            playerId: data.playerId, 
+                            roomId: newRoomId, 
+                            x: 0, y: 0, dirX: 1, dirY: 0 
+                        });
+                    }
+
                     ws.send(JSON.stringify({ type: 'ROOM_CREATED', roomId: newRoomId }));
                     console.log(`Sala creada: ${newRoomId}`);
                     break;
                 }
                 case 'JOIN_ROOM': {
+                    console.log('Mensaje recibido: JOIN_ROOM');
                     const { roomId, playerId } = data;
                     let roomToJoin = this.rooms.get(roomId);
 
@@ -96,11 +107,18 @@ class SocketServer {
                         this.broadcastToRoom(roomId, ws, { type: 'PLAYER_JOINED', playerId });
                         ws.send(JSON.stringify({ type: 'JOINED_ROOM', roomId }));
                     } else {
-                        ws.send(JSON.stringify({ type: 'ERROR', message: 'La sala està plena o ja hi ets' }));
+                        // Opcional: Si el jugador ya estaba en la sala (p.ej. por reconexión), actualizamos su socket info
+                        const existingInfo = this.clients.get(ws);
+                        if (existingInfo && existingInfo.playerId === playerId && existingInfo.roomId === roomId) {
+                             ws.send(JSON.stringify({ type: 'JOINED_ROOM', roomId }));
+                        } else {
+                             ws.send(JSON.stringify({ type: 'ERROR', message: 'La sala està plena o ja hi ets' }));
+                        }
                     }
                     break;
                 }
                 case 'MOVE': {
+                    // console.log('Mensaje recibido: MOVE'); // Demasiado ruido si se loguea siempre
                     if (playerInfo.roomId) {
                         playerInfo.x = data.x;
                         playerInfo.y = data.y;
@@ -117,6 +135,7 @@ class SocketServer {
                 }
                 // --- NUEVO BLOQUE: GESTIÓN DE ATAQUES ---
                 case 'ATTACK': {
+                    console.log('Mensaje recibido: ATTACK');
                     if (playerInfo.roomId) {
                         // Reenviamos el mensaje de ataque a los demás en la sala
                         this.broadcastToRoom(playerInfo.roomId, ws, data);
@@ -126,6 +145,7 @@ class SocketServer {
                     break;
                 }
                 case 'GAME_WON': {
+                    console.log('Mensaje recibido: GAME_WON');
                     // Quan Unity ens avisi que un jugador ha guanyat, guardem el score a MongoDB
                     if (this.scoreService && playerInfo.roomId) {
                         try {
@@ -133,6 +153,10 @@ class SocketServer {
                             // per guardar que aquest usuari ha guanyat la partida (3 punts = level 3 per ex)
                             await this.scoreService.savePlayerScore(playerInfo.roomId, data.playerId, 0, 3);
                             console.log(`Puntuació de victòria desada a MongoDB per a l'usuari ${data.playerId}`);
+                            
+                            // LIMPIEZA: El jugador ya no está en partida, liberamos su estado de sala
+                            playerInfo.roomId = null;
+                            this.clients.set(ws, playerInfo);
                         } catch (error) {
                             console.error("Error intentant guardar la puntuació:", error);
                         }

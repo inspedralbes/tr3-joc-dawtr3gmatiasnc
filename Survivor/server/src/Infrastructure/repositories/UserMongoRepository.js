@@ -15,6 +15,7 @@ class UserMongoRepository {
 
     async save(user) {
         await this.getCollection().insertOne(user);
+        console.log(`[Mongo] Usuario registrado con éxito: ${user.username}`);
         return user;
     }
 }

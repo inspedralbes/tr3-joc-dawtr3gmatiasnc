@@ -16,29 +16,30 @@ class ScoreMongoRepository {
         };
 
         await this.getCollection().insertOne(newScore);
+        console.log(`[Mongo] Puntuación guardada con éxito para el usuario: ${newScore.user_id}`);
         return newScore;
     }
 
     async getLeaderboard(limit = 10) {
         const cursor = await this.getCollection().aggregate([
-            { $sort: { survival_time_seconds: -1 } }, 
-            { $limit: limit }, 
+            { $sort: { survival_time_seconds: -1 } },
+            { $limit: limit },
             {
                 $lookup: {
-                    from: 'users', 
-                    localField: 'user_id', 
-                    foreignField: 'id', 
+                    from: 'users',
+                    localField: 'user_id',
+                    foreignField: 'id',
                     as: 'user_info'
                 }
             },
-            { $unwind: '$user_info' }, 
+            { $unwind: '$user_info' },
             {
-                $project: { 
+                $project: {
                     username: '$user_info.username',
                     survival_time_seconds: 1,
                     level_reached: 1,
                     created_at: 1,
-                    _id: 0 
+                    _id: 0
                 }
             }
         ]);

@@ -17,6 +17,7 @@ class RoomMongoRepository extends IRoomRepository {
         };
 
         await this.getCollection().insertOne(newRoom);
+        console.log(`[Mongo] Sala creada con éxito: ${newRoom.id}`);
         return newRoom;
     }
 
@@ -35,7 +36,7 @@ class RoomMongoRepository extends IRoomRepository {
             { $set: { status: status, updated_at: new Date() } }
         );
     }
-    
+
     async addPlayerToDb(id, playerId) {
         await this.getCollection().updateOne(
             { id: id },

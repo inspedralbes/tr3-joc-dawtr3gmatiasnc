@@ -1,9 +1,9 @@
 // Aquest arxiu serveix per demostrar el requisit de la rúbrica: 
 // "Tests unitaris dels Repositories amb implementació InMemory"
 
-const UserInMemoryRepository = require('./Infrastructure/repositories/UserInMemoryRepository');
-const GameInMemoryRepository = require('./Infrastructure/repositories/GameInMemoryRepository');
-const ScoreInMemoryRepository = require('./Infrastructure/repositories/ScoreInMemoryRepository');
+const UserInMemoryRepository = require('../Infrastructure/repositories/UserInMemoryRepository');
+const GameInMemoryRepository = require('../Infrastructure/repositories/GameInMemoryRepository');
+const ScoreInMemoryRepository = require('../Infrastructure/repositories/ScoreInMemoryRepository');
 const assert = require('assert');
 
 async function runTests() {
